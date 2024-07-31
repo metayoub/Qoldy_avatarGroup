@@ -79,7 +79,9 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
     const remainingCount = length - maxLength;
     const avatarsToRender = data.slice(0, maxLength);
     const avatars = avatarsToRender.map((entity, index) => {
-      const initials = getInitials(entity[title as keyof typeof entity] as string);
+      const initials =
+        entity[title as keyof typeof entity] &&
+        getInitials(entity[title as keyof typeof entity] as string);
       let imageObjec = entity[image as keyof typeof entity] as any;
 
       return (

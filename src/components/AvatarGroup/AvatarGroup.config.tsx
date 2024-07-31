@@ -1,4 +1,9 @@
-import { EComponentKind, T4DComponentConfig, IExostiveElementProps } from '@ws-ui/webform-editor';
+import {
+  EComponentKind,
+  splitDatasourceID,
+  T4DComponentConfig,
+  T4DComponentDatasourceDeclaration,
+} from '@ws-ui/webform-editor';
 import {
   Settings,
   isDatasourcePayload,
@@ -7,12 +12,10 @@ import {
 } from '@ws-ui/webform-editor';
 import {
   isArrayDatasource,
-  isEntityDatasource,
   isEntitySelectionDatasource,
-  isObjectDatasource,
   isRelatedEntitiesAttribute,
-  isRelatedEntityAttribute,
 } from '@ws-ui/shared';
+import cloneDeep from 'lodash/cloneDeep';
 
 import AvatarGroupSettings, { BasicSettings } from './AvatarGroup.settings';
 import { RxAvatar } from 'react-icons/rx';
@@ -23,10 +26,9 @@ export default {
     rules: {
       canDrag: () => true,
     },
-
     kind: EComponentKind.BASIC,
     props: {
-      name: '',
+      iterable: true,
       classNames: [],
       events: [],
     },
@@ -36,6 +38,10 @@ export default {
   },
   info: {
     displayName: 'Avatar Group',
+    sanityCheck: {
+      keys: [{ name: 'datasource', require: true, isDatasource: true }],
+    },
+
     exposed: true,
     icon: RxAvatar,
     events: [
@@ -69,21 +75,45 @@ export default {
       },
     ],
     datasources: {
-      set: (nodeId, _query, payload) => {
-        const new_props: Partial<IExostiveElementProps> = {};
+      declarations: (props) => {
+        const { image, title, datasource = '' } = props as IAvatarGroupProps;
+        const declarations: T4DComponentDatasourceDeclaration[] = [
+          { path: datasource, iterable: true },
+        ];
+        const { id: ds, namespace } = splitDatasourceID(datasource?.trim()) || {};
+
+        if (image) {
+          const imageSrc = `${ds}.[].${image}`;
+          declarations.push({
+            path: namespace ? `${namespace}:${imageSrc}` : imageSrc,
+          });
+        }
+
+        if (title) {
+          const titleSrc = `${ds}.[].${title}`;
+          declarations.push({
+            path: namespace ? `${namespace}:${titleSrc}` : titleSrc,
+          });
+        }
+        return declarations;
+      },
+      set: (nodeId, query, payload) => {
+        const new_props = cloneDeep(query.node(nodeId).get().data.props) as IAvatarGroupProps;
         payload.forEach((item) => {
           if (isDatasourcePayload(item)) {
             if (isEntitySelectionDatasource(item.source) || isArrayDatasource(item.source)) {
               new_props.datasource = getDataTransferSourceID(item);
             }
-            if (isEntityDatasource(item.source) || isObjectDatasource(item.source)) {
-              new_props.currentElement = getDataTransferSourceID(item);
-            }
           } else if (isAttributePayload(item)) {
             if (isRelatedEntitiesAttribute(item.attribute)) {
               new_props.datasource = getDataTransferSourceID(item);
-            } else if (isRelatedEntityAttribute(item.attribute)) {
-              new_props.currentElement = getDataTransferSourceID(item);
+            } else {
+              if (item.attribute.type === 'image') {
+                new_props.image = item.attribute.name || '';
+              }
+              if (item.attribute.type === 'string') {
+                new_props.title = item.attribute.name || '';
+              }
             }
           }
         });
@@ -95,11 +125,12 @@ export default {
   },
   defaultProps: {
     maxLength: 3,
+    iterableChild: true,
   },
 } as T4DComponentConfig<IAvatarGroupProps>;
 
 export interface IAvatarGroupProps extends webforms.ComponentProps {
   maxLength?: number;
-  image?: Text;
-  title?: Text;
+  image?: string;
+  title?: string;
 }
