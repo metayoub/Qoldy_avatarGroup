@@ -16,16 +16,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,jsx,html,css}\""
   },
-  "overrides": {
-    "@ws-ui/webform-editor": {
-      "@ws-ui/code-editor": "0.2.9",
-      "@ws-ui/icons": "0.0.26",
-      "@ws-ui/shared": "0.2.9",
-      "@ws-ui/store": "0.2.9"
-    }
-  },
   "dependencies": {
-    "@ws-ui/webform-editor": "0.3.20",
+    "@ws-ui/webform-editor": "0.3.28",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
