@@ -1,6 +1,6 @@
 import cn from 'classnames';
 import { IAvatarGroupProps } from './AvatarGroup.config';
-import { useEnhancedNode } from '@ws-ui/webform-editor';
+import { useEnhancedNode, useDatasourceSub } from '@ws-ui/webform-editor';
 import { FC, CSSProperties } from 'react';
 
 const AvatarGroup: FC<IAvatarGroupProps> = ({
@@ -12,6 +12,7 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
   const {
     connectors: { connect },
   } = useEnhancedNode();
+  useDatasourceSub();
 
   // calculate the marginRight
   const avatarStyle: CSSProperties = {

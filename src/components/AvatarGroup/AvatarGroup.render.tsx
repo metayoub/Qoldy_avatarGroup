@@ -1,8 +1,7 @@
-import { useRenderer, useSources } from '@ws-ui/webform-editor';
+import { useRenderer, useSources, useDataLoader } from '@ws-ui/webform-editor';
 import cn from 'classnames';
-import { FC, useEffect, useState, useMemo, useCallback, CSSProperties } from 'react';
+import { FC, useEffect, useState, CSSProperties } from 'react';
 import { IAvatarGroupProps } from './AvatarGroup.config';
-import { DataLoader } from '@ws-ui/webform-editor';
 
 const AvatarGroup: FC<IAvatarGroupProps> = ({
   maxLength = 3,
@@ -13,32 +12,23 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
   classNames = [],
 }) => {
   const { connect } = useRenderer();
-  const [data, setData] = useState<datasources.IEntity[]>(() => []);
   const [length, setLength] = useState(() => 0);
   const {
     sources: { datasource: ds },
   } = useSources();
 
-  const loader = useMemo<DataLoader | null>(() => {
-    if (!ds) {
-      return null;
-    }
-    return DataLoader.create(ds, [image as string, title as string]);
-  }, [image, title, ds]);
-
-  const updateFromLoader = useCallback(() => {
-    if (!loader) {
-      return;
-    }
-    setData(loader.page);
-    setLength(loader.length);
-  }, [loader]);
+  const { entities, fetchIndex } = useDataLoader({
+    source: ds,
+  });
 
   useEffect(() => {
-    if (!loader || !ds) {
-      return;
-    }
-    loader.sourceHasChanged().then(updateFromLoader);
+    const init = async () => {
+      const selLength = await ds.getValue('length');
+      setLength(selLength);
+      await fetchIndex(0);
+    };
+
+    init();
   }, []);
 
   // calculate the marginRight
@@ -77,7 +67,7 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
 
   const renderAvatars = () => {
     const remainingCount = length - maxLength;
-    const avatarsToRender = data.slice(0, maxLength);
+    const avatarsToRender = entities.slice(0, maxLength);
     const avatars = avatarsToRender.map((entity, index) => {
       const initials =
         entity[title as keyof typeof entity] &&
