@@ -86,6 +86,7 @@ export default {
           const imageSrc = `${ds}.[].${image}`;
           declarations.push({
             path: namespace ? `${namespace}:${imageSrc}` : imageSrc,
+            iterable: true,
           });
         }
 
@@ -93,6 +94,7 @@ export default {
           const titleSrc = `${ds}.[].${title}`;
           declarations.push({
             path: namespace ? `${namespace}:${titleSrc}` : titleSrc,
+            iterable: true,
           });
         }
         return declarations;
@@ -124,7 +126,7 @@ export default {
     },
   },
   defaultProps: {
-    maxLength: 3,
+    maxLength: 10,
     iterableChild: true,
   },
 } as T4DComponentConfig<IAvatarGroupProps>;

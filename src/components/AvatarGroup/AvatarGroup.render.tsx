@@ -15,7 +15,7 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
   const [length, setLength] = useState(() => 0);
   const {
     sources: { datasource: ds },
-  } = useSources();
+  } = useSources({ acceptIteratorSel: true });
 
   const { entities, fetchIndex } = useDataLoader({
     source: ds,
@@ -68,6 +68,7 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
   const renderAvatars = () => {
     const remainingCount = length - maxLength;
     const avatarsToRender = entities.slice(0, maxLength);
+
     const avatars = avatarsToRender.map((entity, index) => {
       const initials =
         entity[title as keyof typeof entity] &&
