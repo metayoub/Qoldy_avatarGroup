@@ -28,3 +28,8 @@ qodly_*.zip
 *.njsproj
 *.sln
 *.sw?
+
+# Env variables
+.env
+.env.*
+!.env.example
