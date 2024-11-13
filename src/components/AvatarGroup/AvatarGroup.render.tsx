@@ -22,13 +22,18 @@ const AvatarGroup: FC<IAvatarGroupProps> = ({
   });
 
   useEffect(() => {
-    const init = async () => {
+    const fetch = async () => {
       const selLength = await ds.getValue('length');
       setLength(selLength);
       await fetchIndex(0);
     };
 
-    init();
+    fetch();
+    ds.addListener('changed', fetch);
+
+    return () => {
+      ds.removeListener('changed', fetch);
+    };
   }, []);
 
   // calculate the marginRight
